@@ -1,0 +1,31 @@
+config:
+  port: 5000
+
+phonebook:
+  - number: "01453 838872"
+    route_to: "sb-discovery.com:23"
+  - number: "01289 945482"
+    route_to: "a-net.online:23"
+  - number: "02979 168492"
+    route_to: "game.a-net-online.lol:513"
+  - number: "01326 907307"
+    route_to: "manalejandro.com:23"
+  - number: "01773 035780"
+    route_to: "bbs.arcadiabbs.com:23"
+
+sounds:
+  dialtone: "sounds/dialtone.wav"
+  busy: "sounds/busy.wav"
+  modem_noise: "sounds/modem_noise.wav"
+  connect_success: "sounds/connect.wav"
+  connect_failed: "sounds/connect_failed.wav"
+  tone_0: "sounds/0.wav"
+  tone_1: "sounds/1.wav"
+  tone_2: "sounds/2.wav"
+  tone_3: "sounds/3.wav"
+  tone_4: "sounds/4.wav"
+  tone_5: "sounds/5.wav"
+  tone_6: "sounds/6.wav"
+  tone_7: "sounds/7.wav"
+  tone_8: "sounds/8.wav"
+  tone_9: "sounds/9.wav"

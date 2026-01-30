@@ -1,0 +1,45 @@
+# Build output directories
+bin/
+obj/
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa]rm/
+[Aa]rm64/
+bld/
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio
+.vs/
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/
+
+# Native AOT compilation artifacts
+*.dll
+*.so
+*.dylib
+*.a
+
+# Audio files (if large)
+# *.wav
+
+# Logs
+*.log
+
+# OS specific
+.DS_Store
+Thumbs.db

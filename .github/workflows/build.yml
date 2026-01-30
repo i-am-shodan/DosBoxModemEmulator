@@ -1,0 +1,66 @@
+name: Build
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            runtime: win-x64
+            artifact_name: DosBoxModemEmulator-win-x64
+          - os: ubuntu-latest
+            runtime: linux-x64
+            artifact_name: DosBoxModemEmulator-linux-x64
+          - os: ubuntu-latest
+            runtime: linux-arm64
+            artifact_name: DosBoxModemEmulator-linux-arm64-rpi
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Build
+      run: dotnet build -c Release --no-restore
+    
+    - name: Publish
+      run: dotnet publish -c Release -r ${{ matrix.runtime }} --self-contained -o ./publish/${{ matrix.runtime }}
+    
+    - name: Copy config and sounds (Windows)
+      if: matrix.runtime == 'win-x64'
+      shell: pwsh
+      run: |
+        Copy-Item config.yaml ./publish/${{ matrix.runtime }}/
+        if (Test-Path sounds) {
+          Copy-Item -Path sounds -Destination ./publish/${{ matrix.runtime }}/ -Recurse
+        }
+    
+    - name: Copy config and sounds (Linux)
+      if: matrix.runtime != 'win-x64'
+      run: |
+        cp config.yaml ./publish/${{ matrix.runtime }}/
+        if [ -d sounds ]; then
+          cp -r sounds ./publish/${{ matrix.runtime }}/
+        fi
+    
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.artifact_name }}
+        path: ./publish/${{ matrix.runtime }}/*
+        retention-days: 30
