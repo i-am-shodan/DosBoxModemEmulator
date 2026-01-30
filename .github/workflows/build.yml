@@ -33,13 +33,13 @@ jobs:
         dotnet-version: '10.0.x'
     
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore DosBoxModemEmulator.csproj
     
     - name: Build
-      run: dotnet build -c Release --no-restore
+      run: dotnet build DosBoxModemEmulator.csproj -c Release --no-restore
     
     - name: Publish
-      run: dotnet publish -c Release -r ${{ matrix.runtime }} --self-contained -o ./publish/${{ matrix.runtime }}
+      run: dotnet publish DosBoxModemEmulator.csproj -c Release -r ${{ matrix.runtime }} --self-contained -o ./publish/${{ matrix.runtime }} /p:PublishAot=false
     
     - name: Copy config and sounds (Windows)
       if: matrix.runtime == 'win-x64'
