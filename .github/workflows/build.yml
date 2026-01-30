@@ -41,22 +41,14 @@ jobs:
     - name: Publish
       run: dotnet publish DosBoxModemEmulator.csproj -c Release -r ${{ matrix.runtime }} --self-contained -o ./publish/${{ matrix.runtime }} /p:PublishAot=false
     
-    - name: Copy config and sounds (Windows)
+    - name: Copy config (Windows)
       if: matrix.runtime == 'win-x64'
       shell: pwsh
-      run: |
-        Copy-Item config.yaml ./publish/${{ matrix.runtime }}/
-        if (Test-Path sounds) {
-          Copy-Item -Path sounds -Destination ./publish/${{ matrix.runtime }}/ -Recurse
-        }
+      run: Copy-Item config.yaml ./publish/${{ matrix.runtime }}/
     
-    - name: Copy config and sounds (Linux)
+    - name: Copy config (Linux)
       if: matrix.runtime != 'win-x64'
-      run: |
-        cp config.yaml ./publish/${{ matrix.runtime }}/
-        if [ -d sounds ]; then
-          cp -r sounds ./publish/${{ matrix.runtime }}/
-        fi
+      run: cp config.yaml ./publish/${{ matrix.runtime }}/
     
     - name: Upload artifact
       uses: actions/upload-artifact@v4
