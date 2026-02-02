@@ -185,6 +185,9 @@ public class AudioPlayer
                 await Task.Delay(200, cancellationToken); // Longer pause for spaces/dashes
             }
         }
+
+        // Add 1s second gap after all DTMF tones
+        await Task.Delay(1000, cancellationToken);
     }
 
     public async Task PlayCustomSoundAsync(string filename, CancellationToken cancellationToken = default)
