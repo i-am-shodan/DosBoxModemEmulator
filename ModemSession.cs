@@ -218,6 +218,12 @@ public class ModemSession : IDisposable
         _logger.LogInformation("Dialing: {PhoneNumber}", phoneNumber);
         _state = ModemState.Dialing;
 
+        // Always play dialtone first
+        await _audioPlayer.PlayDialtoneAsync(_cts!.Token);
+
+        // Always play dial tones
+        await _audioPlayer.PlayDialTonesAsync(phoneNumber, _cts!.Token);
+
         // Find phonebook entry
         var entry = _config.Phonebook.FirstOrDefault(e => 
             e.Number.Replace(" ", string.Empty).Replace("-", string.Empty) == phoneNumber.Replace(" ", string.Empty).Replace("-", string.Empty));
@@ -225,16 +231,11 @@ public class ModemSession : IDisposable
         if (entry == null)
         {
             _logger.LogWarning("Number not found in phonebook: {PhoneNumber}", phoneNumber);
+            await _audioPlayer.PlayConnectFailedAsync(_cts!.Token);
             await WriteAsync("NO CARRIER\r\n");
             _state = ModemState.Command;
             return;
         }
-
-        // Play dialtone
-        await _audioPlayer.PlayDialtoneAsync(_cts!.Token);
-
-        // Play dial tones
-        await _audioPlayer.PlayDialTonesAsync(phoneNumber, _cts!.Token);
 
         // Play custom sound if specified
         if (!string.IsNullOrEmpty(entry.Play))
