@@ -37,11 +37,11 @@ public class ModemSession : IDisposable
     public async Task RunAsync(CancellationToken cancellationToken)
     {
         _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        
+
         try
         {
             _logger.LogInformation("New modem session from {RemoteEndPoint}", _client.Client.RemoteEndPoint);
-            
+
             // Send welcome message
             await WriteLineAsync("DosBox Modem Emulator v1.0");
             await WriteLineAsync("Ready");
@@ -51,7 +51,7 @@ public class ModemSession : IDisposable
             while (!_cts.Token.IsCancellationRequested && _client.Connected)
             {
                 var bytesRead = await _stream.ReadAsync(buffer, 0, buffer.Length, _cts.Token);
-                
+
                 if (bytesRead == 0)
                 {
                     // Connection closed
@@ -108,7 +108,7 @@ public class ModemSession : IDisposable
                 {
                     var command = _commandBuffer.ToString();
                     _commandBuffer.Clear();
-                    
+
                     if (_echoEnabled)
                     {
                         await WriteAsync("\r\n");
@@ -143,9 +143,9 @@ public class ModemSession : IDisposable
     private async Task HandleCommandAsync(string command)
     {
         _logger.LogDebug("Command: {Command}", command);
-        
+
         var (response, modemCommand) = _atParser.ParseCommand(command);
-        
+
         // Send response
         if (!string.IsNullOrEmpty(response))
         {
@@ -225,7 +225,7 @@ public class ModemSession : IDisposable
         await _audioPlayer.PlayDialTonesAsync(phoneNumber, _cts!.Token);
 
         // Find phonebook entry
-        var entry = _config.Phonebook.FirstOrDefault(e => 
+        var entry = _config.Phonebook.FirstOrDefault(e =>
             e.Number.Replace(" ", string.Empty).Replace("-", string.Empty) == phoneNumber.Replace(" ", string.Empty).Replace("-", string.Empty));
 
         if (entry == null)
@@ -254,44 +254,31 @@ public class ModemSession : IDisposable
 
                 // Attempt connection
                 _tcpProxy = new TcpProxy(_loggerFactory.CreateLogger<TcpProxy>());
-                
+
                 // Subscribe to events
                 _tcpProxy.DataReceived += async (sender, data) =>
                 {
-                    // Need to wait until isConnected == true before sending any data
-                    while (_isConnected == false && _cts!.IsCancellationRequested == false)
-                    {
-                        await Task.Delay(100, _cts!.Token);
-                    }
-
                     await _stream.WriteAsync(data, 0, data.Length, _cts!.Token);
                 };
 
                 _tcpProxy.Disconnected += async (sender, e) =>
                 {
-                    if (_isConnected)
-                    {
-                        _state = ModemState.Command;
-                        _isConnected = false;
-                        await WriteAsync("NO CARRIER\r\n");
-                        _logger.LogInformation("Remote connection closed");
-                    }
+                    _state = ModemState.Command;
+                    _isConnected = false;
+                    await WriteAsync("NO CARRIER\r\n");
+                    _logger.LogInformation("Remote connection closed");
                 };
 
                 var connected = await _tcpProxy.ConnectAsync(host, port, _cts!.Token);
 
                 if (connected)
                 {
-                    // Play modem connection noise after successful connection
-                    await _audioPlayer.PlayModemNoiseAsync(_cts!.Token);
-
-                    // Play connect success sound
-                    await _audioPlayer.PlayConnectSuccessAsync(_cts!.Token);
-
                     _state = ModemState.Connected;
                     _isConnected = true;
                     await WriteAsync("CONNECT 57600\r\n");
                     _logger.LogInformation("Connected to {Host}:{Port}", host, port);
+
+                    _tcpProxy.StartTransfer();
                 }
                 else
                 {
@@ -323,7 +310,7 @@ public class ModemSession : IDisposable
     private async Task HandleHangupAsync()
     {
         _logger.LogInformation("Hanging up");
-        
+
         if (_tcpProxy != null)
         {
             await _tcpProxy.DisconnectAsync();
@@ -348,15 +335,15 @@ public class ModemSession : IDisposable
     private async Task CleanupAsync()
     {
         _cts?.Cancel();
-        
+
         if (_tcpProxy != null)
         {
             await _tcpProxy.DisconnectAsync();
             _tcpProxy.Dispose();
         }
-        
+
         _audioPlayer.StopCurrentAudio();
-        
+
         _stream.Close();
         _client.Close();
     }
