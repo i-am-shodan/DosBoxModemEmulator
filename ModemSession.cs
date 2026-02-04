@@ -258,7 +258,13 @@ public class ModemSession : IDisposable
                 // Subscribe to events
                 _tcpProxy.DataReceived += async (sender, data) =>
                 {
-                    await _stream.WriteAsync(data, 0, data.Length);
+                    // Need to wait until isConnected == true before sending any data
+                    while (_isConnected == false && _cts!.IsCancellationRequested == false)
+                    {
+                        await Task.Delay(100, _cts!.Token);
+                    }
+
+                    await _stream.WriteAsync(data, 0, data.Length, _cts!.Token);
                 };
 
                 _tcpProxy.Disconnected += async (sender, e) =>
