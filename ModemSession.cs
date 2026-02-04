@@ -252,9 +252,6 @@ public class ModemSession : IDisposable
             {
                 var host = parts[0];
 
-                // Play modem connection noise
-                await _audioPlayer.PlayModemNoiseAsync(_cts!.Token);
-
                 // Attempt connection
                 _tcpProxy = new TcpProxy(_loggerFactory.CreateLogger<TcpProxy>());
                 
@@ -282,6 +279,9 @@ public class ModemSession : IDisposable
 
                 if (connected)
                 {
+                    // Play modem connection noise after successful connection
+                    await _audioPlayer.PlayModemNoiseAsync(_cts!.Token);
+
                     // Play connect success sound
                     await _audioPlayer.PlayConnectSuccessAsync(_cts!.Token);
 
@@ -292,7 +292,7 @@ public class ModemSession : IDisposable
                 }
                 else
                 {
-                    // Play connect failed sound
+                    // Play connect failed sound (busy tone)
                     await _audioPlayer.PlayConnectFailedAsync(_cts!.Token);
 
                     _state = ModemState.Command;
