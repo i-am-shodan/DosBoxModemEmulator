@@ -14,7 +14,7 @@ using var loggerFactory = LoggerFactory.Create(builder =>
 
 var logger = loggerFactory.CreateLogger<Program>();
 
-logger.LogInformation("DosBox Modem Emulator v1.0");
+logger.LogInformation("DosBox Modem Emulator v1.1");
 logger.LogInformation("===========================");
 
 // Load configuration

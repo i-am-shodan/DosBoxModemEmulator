@@ -273,6 +273,12 @@ public class ModemSession : IDisposable
 
                 if (connected)
                 {
+                    // Play modem connection noise after successful connection
+                    await _audioPlayer.PlayModemNoiseAsync(_cts!.Token);
+
+                    // Play connect success sound
+                    await _audioPlayer.PlayConnectSuccessAsync(_cts!.Token);
+
                     _state = ModemState.Connected;
                     _isConnected = true;
                     await WriteAsync("CONNECT 57600\r\n");
