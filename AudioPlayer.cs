@@ -22,6 +22,8 @@ public class AudioPlayer
 
     private async Task<bool> PlayAudioFileAsync(string filename, CancellationToken cancellationToken = default)
     {
+        _logger.LogDebug("Playing audio: {Filename}", filename);
+
         try
         {
             var fullPath = Path.Combine(_basePath, filename);
@@ -77,7 +79,6 @@ public class AudioPlayer
                 return false;
             }
 
-            _logger.LogDebug("Playing audio: {Filename}", filename);
             await _currentProcess.WaitForExitAsync(cancellationToken);
             
             var exitCode = _currentProcess.ExitCode;

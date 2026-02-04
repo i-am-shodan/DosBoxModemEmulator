@@ -37,15 +37,14 @@ public class TcpProxy : IDisposable
             // Start reading from the TCP connection
             _cts = new CancellationTokenSource();
             _ = Task.Run(() => ReadLoopAsync(_cts.Token));
-
-            return true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error connecting to {Host}:{Port}", host, port);
             _isConnected = false;
-            return false;
         }
+
+        return _isConnected;
     }
 
     public async Task SendAsync(byte[] data, CancellationToken cancellationToken = default)
